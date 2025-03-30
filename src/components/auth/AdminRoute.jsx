@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchUserData } from '../../redux/authSlice';
 
-const PrivateRoute = ({ children }) => {
+const AdminRoute = ({ children }) => {
   const { user, loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   
@@ -20,13 +20,16 @@ const PrivateRoute = ({ children }) => {
     return null;
   }
 
-  // Kiểm tra user từ localStorage thay vì token
-  if (!user && !localStorage.getItem('user')) {
-    return <Navigate to="/login" />;
+  // Lấy user từ localStorage nếu không có trong Redux
+  const userFromStorage = !user ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+  
+  // Kiểm tra user từ Redux hoặc localStorage
+  if ((!user && !userFromStorage) || (user && user.usertype !== 'admin') || (userFromStorage && userFromStorage.usertype !== 'admin')) {
+    return <Navigate to="/tts" />;
   }
 
-  // Nếu có user, render children
+  // Nếu có user và là admin, render children
   return children;
 };
 
-export default PrivateRoute; 
+export default AdminRoute; 

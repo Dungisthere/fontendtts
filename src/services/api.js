@@ -9,20 +9,21 @@ const api = axios.create({
   },
 });
 
+// Lấy user từ localStorage
+const getUserFromStorage = () => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
 export const authService = {
   login: async (username, password) => {
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-      
-      const response = await api.post('/users/login', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      const response = await api.post('/users/login', {
+        username,
+        password
       });
       
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -36,7 +37,7 @@ export const authService = {
         email,
         password
       });
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -44,14 +45,15 @@ export const authService = {
   },
 
   getMe: async () => {
-    const token = localStorage.getItem('token');
+    const user = getUserFromStorage();
+    if (!user) {
+      throw new Error('Không tìm thấy thông tin người dùng');
+    }
+    
     try {
-      const response = await api.get('/users/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response;
+      // Lấy thông tin user dựa vào ID
+      const response = await api.get(`/users/${user.id}`);
+      return response.data;
     } catch (error) {
       console.error('Get user error:', error);
       throw error;
@@ -64,7 +66,7 @@ export const ttsService = {
   getModels: async () => {
     try {
       const response = await api.get('/tts/models');
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Get models error:', error);
       throw error;
@@ -75,7 +77,7 @@ export const ttsService = {
   getVoices: async () => {
     try {
       const response = await api.get('/tts/voices');
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Get TTS voices error:', error);
       throw error;
@@ -84,7 +86,12 @@ export const ttsService = {
   
   // API tạo giọng nói với tùy chọn model và giọng đọc
   generateSpeech: async (text, model_type = "mien-nam", voice = null, speed = 1.0) => {
-    const token = localStorage.getItem('token');
+    // Kiểm tra đăng nhập từ localStorage
+    const user = localStorage.getItem('user');
+    if (!user) {
+      throw new Error('Vui lòng đăng nhập để sử dụng dịch vụ');
+    }
+    
     try {
       const response = await api.post('/tts-facebook/generate', 
         { 
@@ -94,13 +101,10 @@ export const ttsService = {
           speed
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           responseType: 'blob'
         }
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error('TTS generation error:', error);
       throw error;

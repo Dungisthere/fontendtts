@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../services/api';
 
+// Hàm lấy user từ localStorage
+const getUserFromStorage = () => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
 // Thunks
 export const loginUser = createAsyncThunk(
   'auth/login',
@@ -8,9 +14,8 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authService.login(username, password);
       if (response) {
-        localStorage.setItem('token', 'fake-token-for-development');
-        // Giả lập lấy dữ liệu user sau khi đăng nhập thành công
-        return { username, id: 1, email: 'user@example.com', credits: 0 };
+        localStorage.setItem('user', JSON.stringify(response));
+        return response;
       }
     } catch (error) {
       return rejectWithValue(error.response?.data?.detail || 'Đăng nhập thất bại');
@@ -23,7 +28,6 @@ export const registerUser = createAsyncThunk(
   async ({ username, email, password }, { rejectWithValue }) => {
     try {
       const response = await authService.register(username, email, password);
-      localStorage.setItem('token', 'fake-token-for-development');
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.detail || 'Đăng ký thất bại');
@@ -36,9 +40,13 @@ export const fetchUserData = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.getMe();
+      if (response) {
+        localStorage.setItem('user', JSON.stringify(response));
+      }
       return response;
     } catch (error) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return rejectWithValue(error.response?.data?.detail || 'Không thể lấy thông tin người dùng');
     }
   }
@@ -48,18 +56,22 @@ export const fetchUserData = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
+    user: getUserFromStorage(),
     loading: false,
     error: null,
+    registerSuccess: false,
   },
   reducers: {
     logout: (state) => {
-      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       state.user = null;
       state.error = null;
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearRegisterSuccess: (state) => {
+      state.registerSuccess = false;
     },
   },
   extraReducers: (builder) => {
@@ -82,14 +94,16 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.registerSuccess = false;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.user = action.payload;
         state.loading = false;
+        state.registerSuccess = true;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.registerSuccess = false;
       })
       
       // Fetch user data
@@ -108,5 +122,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, clearRegisterSuccess } = authSlice.actions;
 export default authSlice.reducer; 

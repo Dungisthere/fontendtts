@@ -1,36 +1,45 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, message, Divider } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, clearError } from '../../redux/authSlice';
+import './Auth.css';
 
 const { Title, Text } = Typography;
 
 const Register = () => {
   const dispatch = useDispatch();
-  const { loading, error, user } = useSelector((state) => state.auth);
+  const { loading, error, registerSuccess } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (error) {
       message.error(error);
-      dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error]);
 
   useEffect(() => {
-    if (user) {
-      navigate('/tts');
+    if (registerSuccess) {
+      message.success('Đăng ký thành công! Vui lòng đăng nhập.');
+      navigate('/login');
     }
-  }, [user, navigate]);
+  }, [registerSuccess, navigate]);
 
-  const onFinish = async (values) => {
+  const onFinish = (values) => {
     if (values.password !== values.confirmPassword) {
-      message.error('Mật khẩu xác nhận không khớp!');
+      setConfirmPasswordError('Mật khẩu xác nhận không khớp!');
       return;
     }
-
+    setConfirmPasswordError('');
+    
     dispatch(registerUser({
       username: values.username,
       email: values.email,

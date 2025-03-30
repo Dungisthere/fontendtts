@@ -1,0 +1,55 @@
+/* Auth.css - Styles cho các trang đăng nhập và đăng ký */
+
+.auth-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 0 20px;
+}
+
+.auth-card {
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.auth-card-body {
+  padding: 40px 30px;
+}
+
+.auth-title-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-title {
+  margin: 0;
+  color: #1890ff;
+}
+
+.auth-button {
+  height: 46px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.auth-divider {
+  margin: 24px 0;
+}
+
+.auth-footer {
+  text-align: center;
+}
+
+.auth-link {
+  font-weight: bold;
+  color: #1890ff;
+}

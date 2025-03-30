@@ -34,6 +34,16 @@ const MainLayout = ({ children }) => {
     }
   ];
 
+  // Thêm menu admin nếu người dùng có quyền admin
+  if (user && user.usertype === 'admin') {
+    items.push({
+      key: '/admin',
+      icon: <SettingOutlined />,
+      label: 'Quản trị hệ thống',
+      onClick: () => navigate('/admin')
+    });
+  }
+
   const userMenuItems = {
     items: [
       {
@@ -46,6 +56,13 @@ const MainLayout = ({ children }) => {
         label: 'Cài đặt',
         icon: <SettingOutlined />,
       },
+      // Thêm menu admin cho dropdown nếu người dùng có quyền admin
+      ...(user && user.usertype === 'admin' ? [{
+        key: 'admin',
+        label: 'Trang quản trị',
+        icon: <SettingOutlined />,
+        onClick: () => navigate('/admin'),
+      }] : []),
       {
         type: 'divider',
       },
@@ -156,6 +173,16 @@ const MainLayout = ({ children }) => {
             >
               Trang chủ
             </Button>
+            {user && user.usertype === 'admin' && (
+              <Button
+                type="link"
+                icon={<SettingOutlined />}
+                onClick={() => navigate('/admin')}
+                size="small"
+              >
+                Quản trị
+              </Button>
+            )}
             {user && (
               <Button
                 type="link"
