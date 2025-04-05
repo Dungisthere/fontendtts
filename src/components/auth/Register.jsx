@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, message, Divider } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, Typography, Divider } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined, LoginOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser, clearError } from '../../redux/authSlice';
+import { registerUser, clearError, clearRegisterSuccess } from '../../redux/authSlice';
+import { toast } from 'react-toastify';
 import './Auth.css';
 
 const { Title, Text } = Typography;
@@ -15,27 +16,23 @@ const Register = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
   useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
     if (error) {
-      message.error(error);
+      toast.error(error);
+      dispatch(clearError());
     }
-  }, [error]);
+  }, [error, dispatch]);
 
   useEffect(() => {
     if (registerSuccess) {
-      message.success('Đăng ký thành công! Vui lòng đăng nhập.');
+      toast.success('Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
+      dispatch(clearRegisterSuccess());
       navigate('/login');
     }
-  }, [registerSuccess, navigate]);
+  }, [registerSuccess, dispatch, navigate]);
 
   const onFinish = (values) => {
     if (values.password !== values.confirmPassword) {
-      setConfirmPasswordError('Mật khẩu xác nhận không khớp!');
+      toast.error('Mật khẩu xác nhận không khớp!');
       return;
     }
     setConfirmPasswordError('');

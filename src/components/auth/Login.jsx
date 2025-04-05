@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, message, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Card, Typography, Divider } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../../redux/authSlice';
+import { toast } from 'react-toastify';
 
 const { Title, Text } = Typography;
 
@@ -14,18 +15,30 @@ const Login = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      // Đảm bảo toast hiển thị khi có lỗi
+      toast.error(error, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      console.log("Hiển thị toast lỗi:", error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
 
   useEffect(() => {
     if (user) {
+      toast.success('Đăng nhập thành công!');
       navigate('/tts');
     }
   }, [user, navigate]);
 
   const onFinish = async (values) => {
+    console.log("Bắt đầu đăng nhập với:", values);
     dispatch(loginUser({
       username: values.username,
       password: values.password

@@ -25,26 +25,13 @@ const Roles = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // Trong thực tế sẽ gọi API thực
-      /*
+      // Gọi API thực để lấy danh sách người dùng
       const response = await adminService.getUsers();
-      setUsers(response.data);
-      */
-      
-      // Dữ liệu mẫu
-      setTimeout(() => {
-        const mockUsers = [
-          { id: 1, username: 'user1', email: 'user1@example.com', usertype: 'user', active: true },
-          { id: 2, username: 'admin1', email: 'admin1@example.com', usertype: 'admin', active: true },
-          { id: 3, username: 'user3', email: 'user3@example.com', usertype: 'user', active: false },
-          { id: 4, username: 'user4', email: 'user4@example.com', usertype: 'user', active: true },
-          { id: 5, username: 'user5', email: 'user5@example.com', usertype: 'user', active: true },
-        ];
-        setUsers(mockUsers);
-        setLoading(false);
-      }, 1000);
+      setUsers(response);
+      setLoading(false);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách người dùng:', error);
+      message.error('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
       setLoading(false);
     }
   };
@@ -72,28 +59,28 @@ const Roles = () => {
         return;
       }
       
-      // Trong thực tế sẽ gọi API thực
-      /*
+      setLoading(true);
+      // Gọi API thực để thay đổi quyền người dùng
       await adminService.changeUserType(record.id, row.usertype);
-      */
       
-      // Mô phỏng cập nhật
+      // Cập nhật state sau khi API thành công
       const newData = [...users];
       const index = newData.findIndex(item => record.id === item.id);
       if (index > -1) {
         const item = newData[index];
         newData.splice(index, 1, {
           ...item,
-          ...row,
+          usertype: row.usertype,
         });
         setUsers(newData);
-        setEditingKey('');
         message.success(`Đã thay đổi quyền cho người dùng ${record.username} thành ${row.usertype === 'admin' ? 'quản trị viên' : 'người dùng thường'}`);
-      } else {
-        setEditingKey('');
       }
+      setEditingKey('');
+      setLoading(false);
     } catch (error) {
       console.error('Lỗi khi lưu thay đổi:', error);
+      message.error('Không thể thay đổi quyền người dùng. Vui lòng thử lại sau.');
+      setLoading(false);
     }
   };
 

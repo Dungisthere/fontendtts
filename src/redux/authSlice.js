@@ -18,7 +18,7 @@ export const loginUser = createAsyncThunk(
         return response;
       }
     } catch (error) {
-      return rejectWithValue(error.response?.data?.detail || 'Đăng nhập thất bại');
+      return rejectWithValue(error.message || 'Đăng nhập thất bại');
     }
   }
 );
@@ -30,7 +30,7 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register(username, email, password);
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.detail || 'Đăng ký thất bại');
+      return rejectWithValue(error.message || error.response?.data?.detail || 'Đăng ký thất bại');
     }
   }
 );

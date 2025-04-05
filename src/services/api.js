@@ -26,7 +26,23 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      // Xử lý trường hợp khi response trả về detail
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      
+      // Xử lý các loại lỗi khác khi không có detail
+      if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 401) {
+          throw new Error('Tên đăng nhập hoặc mật khẩu không chính xác');
+        } else if (status === 404) {
+          throw new Error('Tài khoản không tồn tại');
+        }
+      }
+      
+      throw new Error('Đăng nhập thất bại. Vui lòng thử lại sau.');
     }
   },
   
@@ -40,7 +56,24 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
-      throw error;
+      
+      // Xử lý trường hợp khi response trả về detail
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      
+      // Xử lý các loại lỗi khác khi không có detail
+      if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 400) {
+          throw new Error('Thông tin đăng ký không hợp lệ');
+        } else if (status === 409) {
+          throw new Error('Tên đăng nhập hoặc email đã tồn tại');
+        }
+      }
+      
+      throw new Error('Đăng ký thất bại. Vui lòng thử lại sau.');
     }
   },
 
@@ -104,7 +137,7 @@ export const ttsService = {
           responseType: 'blob'
         }
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('TTS generation error:', error);
       throw error;

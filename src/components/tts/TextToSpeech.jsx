@@ -43,10 +43,18 @@ const TextToSpeech = () => {
 
     setLoading(true);
     try {
+      // Bây giờ ttsService.generateSpeech trả về response hoàn chỉnh
       const response = await ttsService.generateSpeech(text);
-      // Trường hợp response là FileResponse từ FastAPI thì response.data sẽ là Blob
-      const blob = response.data;
-      const url = URL.createObjectURL(blob);
+      
+      // Log để debug
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      console.log('Response data type:', typeof response.data);
+      console.log('Response data is Blob:', response.data instanceof Blob);
+      
+      // response.data bây giờ là Blob
+      const audioBlob = response.data;
+      const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
       message.success('Đã tạo giọng nói thành công!');
     } catch (error) {
@@ -69,8 +77,7 @@ const TextToSpeech = () => {
         message="Thông tin về model"
         description={
           <div>
-            <p>Model hiện tại: <strong>facebook/mms-tts-vie</strong> (giọng nữ miền Bắc)</p>
-            <p>API chỉ hỗ trợ một loại giọng đọc. Các tùy chọn giọng nam/nữ và vùng miền sẽ được hỗ trợ trong phiên bản sau.</p>
+            <p>Model hiện tại: <strong>facebook/mms-tts-vie</strong></p>
           </div>
         }
         type="info"
