@@ -145,4 +145,43 @@ export const ttsService = {
   }
 };
 
+export const configService = {
+  // Lấy thông tin cấu hình
+  getConfig: async () => {
+    try {
+      console.log('Đang gọi API lấy cấu hình...');
+      const response = await api.get('/config');
+      console.log('Kết quả API lấy cấu hình:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get config error:', error);
+      // Trả về đối tượng rỗng thay vì throw error để tránh crash UI
+      if (error.response && error.response.status === 404) {
+        console.log('Chưa có cấu hình, trả về đối tượng rỗng');
+        return {};
+      }
+      throw error;
+    }
+  },
+  
+  // Cập nhật cấu hình
+  updateConfig: async (configData) => {
+    try {
+      // Kiểm tra quyền admin
+      const user = getUserFromStorage();
+      if (!user || user.usertype !== 'admin') {
+        throw new Error('Không có quyền cập nhật cấu hình');
+      }
+      
+      console.log('Đang gọi API cập nhật cấu hình:', configData);
+      const response = await api.put('/config', configData);
+      console.log('Kết quả API cập nhật cấu hình:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Update config error:', error);
+      throw error;
+    }
+  }
+};
+
 export default api; 

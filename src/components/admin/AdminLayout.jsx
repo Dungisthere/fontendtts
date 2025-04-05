@@ -10,7 +10,8 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   BellOutlined,
-  KeyOutlined
+  KeyOutlined,
+  ToolOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -80,6 +81,12 @@ const AdminLayout = ({ children }) => {
       icon: <KeyOutlined />,
       label: 'Phân quyền',
       onClick: () => navigate('/admin/roles')
+    },
+    {
+      key: '/admin/system-config',
+      icon: <ToolOutlined />,
+      label: 'Cài đặt hệ thống',
+      onClick: () => navigate('/admin/system-config')
     }
   ];
 

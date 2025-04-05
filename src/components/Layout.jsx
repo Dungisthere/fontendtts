@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Layout, Menu, Button, Avatar, Dropdown, message, Badge } from 'antd';
 import { 
   UserOutlined, 
@@ -5,11 +6,15 @@ import {
   SoundOutlined, 
   HomeOutlined, 
   BellOutlined,
-  SettingOutlined
+  SettingOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  GlobalOutlined
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
+import { configService } from '../services/api';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -18,6 +23,24 @@ const MainLayout = ({ children }) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const [config, setConfig] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Lấy thông tin cấu hình khi component được render
+    fetchConfig();
+  }, []);
+
+  const fetchConfig = async () => {
+    try {
+      const data = await configService.getConfig();
+      setConfig(data);
+    } catch (error) {
+      console.error('Error loading config:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -94,8 +117,18 @@ const MainLayout = ({ children }) => {
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-            <SoundOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '10px' }} />
-            <h2 style={{ margin: 0, color: '#1890ff' }}>TTS App</h2>
+            {config && config.logo_base64 ? (
+              <img 
+                src={config.logo_base64} 
+                alt={config.website_name || 'TTS App'} 
+                style={{ height: '40px', marginRight: '10px' }} 
+              />
+            ) : (
+              <SoundOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '10px' }} />
+            )}
+            <h2 style={{ margin: 0, color: '#1890ff' }}>
+              {config && config.website_name ? config.website_name : 'TTS App'}
+            </h2>
           </Link>
         </div>
 
@@ -161,39 +194,76 @@ const MainLayout = ({ children }) => {
         </Content>
       </Layout>
 
-      <Footer style={{ textAlign: 'center', background: '#f0f0f0', padding: '12px 50px', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-          <span>TTS App ©{new Date().getFullYear()} - Chuyển văn bản thành giọng nói</span>
-          <div>
-            <Button 
-              type="link" 
-              icon={<HomeOutlined />} 
-              onClick={() => navigate('/')}
-              size="small"
-            >
-              Trang chủ
-            </Button>
-            {user && user.usertype === 'admin' && (
-              <Button
-                type="link"
-                icon={<SettingOutlined />}
-                onClick={() => navigate('/admin')}
-                size="small"
-              >
-                Quản trị
-              </Button>
-            )}
-            {user && (
-              <Button
-                type="link"
-                danger
-                icon={<LogoutOutlined />}
-                onClick={handleLogout}
-                size="small"
-              >
-                Đăng xuất
-              </Button>
-            )}
+      <Footer style={{ textAlign: 'center', background: '#f0f0f0', padding: '24px 50px', width: '100%' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1', minWidth: '300px', textAlign: 'left', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                {config && config.logo_base64 ? (
+                  <img 
+                    src={config.logo_base64} 
+                    alt={config.website_name || 'TTS App'} 
+                    style={{ height: '50px', marginRight: '10px' }} 
+                  />
+                ) : (
+                  <SoundOutlined style={{ fontSize: '32px', color: '#1890ff', marginRight: '10px' }} />
+                )}
+                <h2 style={{ margin: 0, color: '#333' }}>
+                  {config && config.website_name ? config.website_name : 'TTS App'}
+                </h2>
+              </div>
+              <p>Chuyển văn bản thành giọng nói với chất lượng cao</p>
+              {config && config.website_url && (
+                <p><GlobalOutlined /> <a href={config.website_url} target="_blank" rel="noopener noreferrer">{config.website_url}</a></p>
+              )}
+            </div>
+
+            <div style={{ flex: '1', minWidth: '300px', textAlign: 'left', marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '16px' }}>Liên hệ với chúng tôi</h3>
+              {config && config.phone_1 && (
+                <p><PhoneOutlined /> {config.phone_1}</p>
+              )}
+              {config && config.phone_2 && (
+                <p><PhoneOutlined /> {config.phone_2}</p>
+              )}
+              {config && config.email && (
+                <p><MailOutlined /> <a href={`mailto:${config.email}`}>{config.email}</a></p>
+              )}
+            </div>
+
+            <div style={{ flex: '1', minWidth: '300px', textAlign: 'left', marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '16px' }}>Truy cập nhanh</h3>
+              <p>
+                <Button 
+                  type="link" 
+                  icon={<HomeOutlined />} 
+                  onClick={() => navigate('/')}
+                  size="small"
+                  style={{ padding: '0' }}
+                >
+                  Trang chủ
+                </Button>
+              </p>
+              {user && user.usertype === 'admin' && (
+                <p>
+                  <Button
+                    type="link"
+                    icon={<SettingOutlined />}
+                    onClick={() => navigate('/admin')}
+                    size="small"
+                    style={{ padding: '0' }}
+                  >
+                    Quản trị
+                  </Button>
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <div style={{ borderTop: '1px solid #ddd', paddingTop: '15px', marginTop: '10px' }}>
+            <p style={{ margin: 0 }}>
+              {config && config.website_name ? config.website_name : 'TTS App'} ©{new Date().getFullYear()} - Bản quyền thuộc về chúng tôi
+            </p>
           </div>
         </div>
       </Footer>

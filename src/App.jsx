@@ -15,8 +15,10 @@ import Dashboard from './components/admin/Dashboard';
 import UserManagement from './components/admin/UserManagement';
 import Credits from './components/admin/Credits';
 import Roles from './components/admin/Roles';
+import SystemConfig from './components/admin/SystemConfig';
 import { fetchUserData } from './redux/authSlice';
 import './App.css';
+import { ToastContainer } from 'react-toastify';
 
 // Thêm CSS để đảm bảo toàn bộ app có chiều rộng 100%
 const appStyles = {
@@ -102,6 +104,17 @@ function AppContent() {
             </AdminRoute>
           } 
         />
+
+        <Route 
+          path="/admin/system-config" 
+          element={
+            <AdminRoute>
+              <AdminLayout>
+                <SystemConfig />
+              </AdminLayout>
+            </AdminRoute>
+          } 
+        />
         
         <Route path="/" element={<Navigate to="/tts" replace />} />
       </Routes>
@@ -117,6 +130,7 @@ function App() {
           <AppContent />
         </div>
       </ConfigProvider>
+      <ToastContainer />
     </Provider>
   );
 }
