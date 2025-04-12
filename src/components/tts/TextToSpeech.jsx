@@ -115,7 +115,7 @@ const TextToSpeech = () => {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Nhập văn bản mà bạn muốn chuyển thành giọng nói..."
-                  maxLength={1000}
+                  maxLength={5000}
                   showCount
                   style={{ 
                     width: '100%',
