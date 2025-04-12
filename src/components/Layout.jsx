@@ -9,7 +9,8 @@ import {
   SettingOutlined,
   PhoneOutlined,
   MailOutlined,
-  GlobalOutlined
+  GlobalOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -48,18 +49,22 @@ const MainLayout = ({ children }) => {
     navigate('/login');
   };
 
-  const items = [
+  const menuItems = [
     {
-      key: '/tts',
+      key: 'tts',
+      label: <Link to="/tts">Text to Speech</Link>,
       icon: <SoundOutlined />,
-      label: 'Chuyển văn bản thành giọng nói',
-      onClick: () => navigate('/tts')
-    }
+    },
+    {
+      key: 'voice-library',
+      label: <Link to="/voice-library">Voice Library</Link>,
+      icon: <BookOutlined />,
+    },
   ];
 
   // Thêm menu admin nếu người dùng có quyền admin
   if (user && user.usertype === 'admin') {
-    items.push({
+    menuItems.push({
       key: '/admin',
       icon: <SettingOutlined />,
       label: 'Quản trị hệ thống',
@@ -105,18 +110,18 @@ const MainLayout = ({ children }) => {
         style={{
           position: 'fixed',
           top: 0,
-          zIndex: 10,
+          zIndex: 1,
           width: '100%',
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 24px',
+          alignItems: 'center',
           background: '#fff',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          padding: '0 30px'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', marginRight: '30px' }}>
             {config && config.logo_base64 ? (
               <img 
                 src={config.logo_base64} 
@@ -130,6 +135,15 @@ const MainLayout = ({ children }) => {
               {config && config.website_name ? config.website_name : 'TTS App'}
             </h2>
           </Link>
+          
+          {user && (
+            <Menu
+              mode="horizontal"
+              style={{ border: 'none', background: 'transparent' }}
+              selectedKeys={[location.pathname.split('/')[1] || 'tts']}
+              items={menuItems}
+            />
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

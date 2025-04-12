@@ -100,7 +100,28 @@ const Register = () => {
               name="password"
               rules={[
                 { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+                { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    
+                    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+                    const hasUpperCase = /[A-Z]/.test(value);
+                    const hasLowerCase = /[a-z]/.test(value);
+                    
+                    if (!hasSpecialChar) {
+                      return Promise.reject('Mật khẩu phải có ít nhất 1 ký tự đặc biệt');
+                    }
+                    if (!hasUpperCase) {
+                      return Promise.reject('Mật khẩu phải có ít nhất 1 chữ hoa');
+                    }
+                    if (!hasLowerCase) {
+                      return Promise.reject('Mật khẩu phải có ít nhất 1 chữ thường');
+                    }
+                    
+                    return Promise.resolve();
+                  }
+                }
               ]}
               hasFeedback
             >

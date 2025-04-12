@@ -71,12 +71,6 @@ const AdminLayout = ({ children }) => {
       onClick: () => navigate('/admin/users')
     },
     {
-      key: '/admin/credits',
-      icon: <WalletOutlined />,
-      label: 'Quản lý credits',
-      onClick: () => navigate('/admin/credits')
-    },
-    {
       key: '/admin/roles',
       icon: <KeyOutlined />,
       label: 'Phân quyền',

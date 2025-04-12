@@ -9,6 +9,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import TextToSpeech from './components/tts/TextToSpeech';
+import VoiceLibrary from './components/tts/VoiceLibrary';
 import PrivateRoute from './components/auth/PrivateRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import Dashboard from './components/admin/Dashboard';
@@ -55,6 +56,17 @@ function AppContent() {
             <PrivateRoute>
               <MainLayout>
                 <TextToSpeech />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        
+        <Route 
+          path="/voice-library" 
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <VoiceLibrary />
               </MainLayout>
             </PrivateRoute>
           } 
