@@ -23,6 +23,12 @@ const VoiceLibrary = () => {
     }
   }, [user]);
 
+  // Kiểm tra xem có mã khởi tạo nào cần bổ sung
+  useEffect(() => {
+    // Thêm bất kỳ khởi tạo cần thiết khác
+    console.log("VoiceLibrary component đã được tải lại");
+  }, []);
+
   // Xử lý load danh sách profile
   const loadProfiles = async () => {
     if (!user) return;

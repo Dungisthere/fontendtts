@@ -167,6 +167,22 @@ export const adminService = {
     }
   },
   
+  // Reset mật khẩu người dùng - chỉ admin
+  resetUserPassword: async (userId, newPassword) => {
+    try {
+      checkAdminPermission();
+      console.log(`Đang gọi API reset mật khẩu cho user ID ${userId}`);
+      const response = await api.post(`/users/${userId}/reset-password`, {
+        new_password: newPassword
+      });
+      console.log('Kết quả reset mật khẩu:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi reset mật khẩu:', error);
+      throw error;
+    }
+  },
+  
   getCreditStats: async () => {
     try {
       checkAdminPermission();

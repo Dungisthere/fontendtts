@@ -41,9 +41,9 @@ const TextToSpeechConverter = ({ profiles, userId }) => {
       const profileData = await voiceProfileService.getProfileDetail(selectedProfileId, userId);
       setProfileDetail(profileData);
       
-      // Lấy danh sách từ vựng
-      const vocabularies = await vocabularyService.getVocabularies(selectedProfileId, userId);
-      const words = vocabularies.map(vocab => vocab.word.toLowerCase());
+      // Lấy danh sách từ vựng (tất cả từ vựng với limit cao)
+      const result = await vocabularyService.getVocabularies(selectedProfileId, userId, 1, 1000);
+      const words = result.data.map(vocab => vocab.word.toLowerCase());
       setAvailableWords(words);
     } catch (err) {
       setError('Không thể tải danh sách từ vựng. Vui lòng thử lại sau.');
@@ -60,9 +60,26 @@ const TextToSpeechConverter = ({ profiles, userId }) => {
       return;
     }
     
-    const words = text.toLowerCase().split(/\s+/);
+    // Chuẩn hóa văn bản: chuyển thành chữ thường và xử lý dấu câu
+    let processedText = text.toLowerCase().trim();
+    
+    // Thêm khoảng trắng trước dấu câu để tách riêng
+    for (const punct of [',', '.', '?', '!', ':', ';']) {
+      processedText = processedText.replace(punct, ` ${punct}`);
+    }
+    
+    // Tách từ và loại bỏ khoảng trắng thừa
+    const words = processedText.split(/\s+/).filter(word => word.trim() !== '');
+    
+    // Tìm các từ thiếu
     const missing = words.filter(word => !availableWords.includes(word));
-    setMissingWords([...new Set(missing)]); // Loại bỏ trùng lặp
+    
+    // Loại bỏ trùng lặp
+    setMissingWords([...new Set(missing)]);
+    
+    console.log('Các từ trong văn bản:', words);
+    console.log('Các từ đã có:', availableWords);
+    console.log('Các từ bị thiếu:', missing);
   };
   
   // Xử lý convert
@@ -91,17 +108,43 @@ const TextToSpeechConverter = ({ profiles, userId }) => {
         }, 500);
       }
     } catch (err) {
-      let errorMessage = 'Không thể chuyển đổi văn bản thành giọng nói. Vui lòng thử lại sau.';
+      console.error('Chi tiết lỗi TTS:', err);
       
-      // Kiểm tra xem lỗi có phải do thiếu từ không
-      if (err.response && err.response.data && err.response.data.detail) {
-        if (err.response.data.detail.includes('Missing audio for words')) {
-          errorMessage = err.response.data.detail;
+      let errorMessage = 'Không thể chuyển đổi văn bản thành giọng nói.';
+      
+      // Xử lý thông báo lỗi chi tiết từ server
+      if (err.response && err.response.data) {
+        if (err.response.data.detail) {
+          // Xử lý lỗi thiếu từ trong vocabulary
+          if (err.response.data.detail.includes('Các từ sau chưa có trong vocabulary')) {
+            const missingWordsMatch = err.response.data.detail.match(/Các từ sau chưa có trong vocabulary: (.+)/);
+            if (missingWordsMatch && missingWordsMatch[1]) {
+              const missingWords = missingWordsMatch[1].split(', ');
+              errorMessage = `Các từ sau chưa có trong thư viện: ${missingWordsMatch[1]}`;
+              
+              // Cập nhật danh sách từ bị thiếu để hiển thị
+              setMissingWords(missingWords);
+            } else {
+              errorMessage = err.response.data.detail;
+            }
+          }
+          // Xử lý lỗi không tìm thấy file audio
+          else if (err.response.data.detail.includes('File audio cho từ')) {
+            const wordMatch = err.response.data.detail.match(/File audio cho từ '(.+)' không tồn tại/);
+            if (wordMatch && wordMatch[1]) {
+              errorMessage = `File âm thanh cho từ '${wordMatch[1]}' không tồn tại. Vui lòng ghi âm lại từ này.`;
+            } else {
+              errorMessage = err.response.data.detail;
+            }
+          }
+          // Các lỗi khác
+          else {
+            errorMessage = err.response.data.detail;
+          }
         }
       }
       
       setError(errorMessage);
-      console.error(err);
     } finally {
       setLoading(false);
     }

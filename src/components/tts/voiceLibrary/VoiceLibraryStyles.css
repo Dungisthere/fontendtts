@@ -49,4 +49,99 @@
 /* Style cho BatchRecorder */
 .batch-recorder .modal-body {
   min-height: 300px;
+}
+
+/* Style cho phân trang */
+.pagination {
+  margin-top: 1rem;
+}
+
+.pagination .page-item .page-link {
+  color: #007bff;
+  border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Định dạng nút trong bảng từ vựng */
+.vocabulary-table .btn-outline-primary,
+.vocabulary-table .btn-outline-danger {
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.25rem;
+  min-width: 60px;
+}
+
+/* Định dạng cột hành động */
+.vocabulary-table .action-buttons {
+  min-width: 170px;
+}
+
+/* Định dạng nút action */
+.vocabulary-table .btn-action {
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Định dạng nút xóa */
+.vocabulary-table .btn-outline-danger {
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  background-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vocabulary-table .btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Icon trong nút */
+.vocabulary-table .btn i {
+  margin-right: 4px;
+}
+
+/* Hiệu ứng khi hover vào hàng */
+.vocabulary-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Hiển thị đầy đủ nút khi màn hình nhỏ */
+@media (max-width: 768px) {
+  .vocabulary-table .btn {
+    margin-bottom: 5px;
+    display: block;
+    width: 100%;
+  }
+  
+  /* Định dạng riêng cho nút xóa trên mobile */
+  .vocabulary-table .btn-outline-danger {
+    background-color: #fff0f0;
+    border-width: 2px;
+    font-weight: 500;
+  }
+  
+  /* Căn giữa biểu tượng và text trong nút */
+  .vocabulary-table .btn i {
+    margin-right: 8px;
+    font-size: 1rem;
+  }
 } 

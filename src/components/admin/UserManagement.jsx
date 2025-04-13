@@ -26,7 +26,8 @@ import {
   LockOutlined,
   UnlockOutlined,
   DollarOutlined,
-  MinusCircleOutlined
+  MinusCircleOutlined,
+  KeyOutlined
 } from '@ant-design/icons';
 import { adminService } from '../../services/adminApi';
 
@@ -42,12 +43,15 @@ const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddCreditsModalOpen, setIsAddCreditsModalOpen] = useState(false);
   const [isDeductCreditsModalOpen, setIsDeductCreditsModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalMode, setModalMode] = useState('add'); // 'add', 'edit'
+  const [newPassword, setNewPassword] = useState('');
   
   const [form] = Form.useForm();
   const [addCreditsForm] = Form.useForm();
   const [deductCreditsForm] = Form.useForm();
+  const [resetPasswordForm] = Form.useForm();
 
   // Lấy danh sách người dùng
   useEffect(() => {
@@ -142,6 +146,7 @@ const UserManagement = () => {
     setIsModalOpen(false);
     setIsAddCreditsModalOpen(false);
     setIsDeductCreditsModalOpen(false);
+    setIsResetPasswordModalOpen(false);
   };
 
   // Xử lý thêm/cập nhật người dùng
@@ -263,6 +268,24 @@ const UserManagement = () => {
     }
   };
 
+  // Xử lý reset mật khẩu
+  const showResetPasswordModal = (user) => {
+    setSelectedUser(user);
+    resetPasswordForm.resetFields();
+    setIsResetPasswordModalOpen(true);
+  };
+  
+  const handleResetPassword = async (values) => {
+    try {
+      const result = await adminService.resetUserPassword(selectedUser.id, values.new_password);
+      message.success('Mật khẩu đã được đặt lại thành công');
+      setIsResetPasswordModalOpen(false);
+    } catch (error) {
+      console.error('Lỗi khi reset mật khẩu:', error);
+      message.error('Không thể đặt lại mật khẩu');
+    }
+  };
+
   const columns = [
     {
       title: 'ID',
@@ -309,7 +332,7 @@ const UserManagement = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 300,
+      width: 350,
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Chỉnh sửa">
@@ -335,6 +358,15 @@ const UserManagement = () => {
               icon={record.usertype === 'admin' ? <UserDeleteOutlined /> : <UserAddOutlined />}
               onClick={() => handleUserTypeChange(record, record.usertype === 'admin' ? 'user' : 'admin')}
               type={record.usertype === 'admin' ? 'default' : 'primary'}
+              size="small"
+            />
+          </Tooltip>
+          
+          <Tooltip title="Đặt lại mật khẩu">
+            <Button
+              icon={<KeyOutlined />}
+              onClick={() => showResetPasswordModal(record)}
+              type="default"
               size="small"
             />
           </Tooltip>
@@ -572,6 +604,77 @@ const UserManagement = () => {
                 htmlType="submit"
               >
                 Trừ tiền
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+      
+      {/* Modal reset mật khẩu */}
+      <Modal
+        title={`Đặt lại mật khẩu cho ${selectedUser?.username || ''}`}
+        open={isResetPasswordModalOpen}
+        onCancel={handleCancel}
+        footer={null}
+        forceRender
+      >
+        <Form
+          form={resetPasswordForm}
+          name="resetPasswordForm"
+          layout="vertical"
+          onFinish={handleResetPassword}
+        >
+          <Form.Item
+            name="new_password"
+            label="Mật khẩu mới"
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  
+                  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+                  const hasUpperCase = /[A-Z]/.test(value);
+                  const hasLowerCase = /[a-z]/.test(value);
+                  const hasDigit = /\d/.test(value);
+                  
+                  if (!hasSpecialChar || !hasUpperCase || !hasLowerCase || !hasDigit) {
+                    return Promise.reject('Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt');
+                  }
+                  
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+          
+          <Form.Item
+            name="confirm_password"
+            label="Xác nhận mật khẩu"
+            dependencies={['new_password']}
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('new_password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject('Hai mật khẩu không khớp');
+                },
+              }),
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+          
+          <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
+            <Space>
+              <Button onClick={handleCancel}>Hủy</Button>
+              <Button type="primary" htmlType="submit">
+                Đặt lại mật khẩu
               </Button>
             </Space>
           </Form.Item>
