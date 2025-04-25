@@ -12,6 +12,8 @@ import {
   Divider,
   Spin,
   Alert,
+  Select,
+  Radio
 } from 'antd';
 import { 
   SoundOutlined, 
@@ -27,12 +29,15 @@ import { useSelector } from 'react-redux';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
+const { Option } = Select;
 
 const TextToSpeech = () => {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('model_old');
+  const [speed, setSpeed] = useState('normal');
   const { user } = useSelector((state) => state.auth);
 
   const handleGenerateSpeech = async () => {
@@ -43,18 +48,31 @@ const TextToSpeech = () => {
 
     setLoading(true);
     try {
-      // Bây giờ ttsService.generateSpeech trả về response hoàn chỉnh
-      const response = await ttsService.generateSpeech(text);
+      let url;
       
-      // Log để debug
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      console.log('Response data type:', typeof response.data);
-      console.log('Response data is Blob:', response.data instanceof Blob);
+      if (selectedModel === 'model_old') {
+        // Sử dụng model cũ
+        const response = await ttsService.generateSpeech(text);
+        
+        // Log để debug
+        console.log('Response status:', response.status);
+        
+        // Tạo URL từ blob
+        const audioBlob = response.data;
+        url = URL.createObjectURL(audioBlob);
+      } else {
+        // Sử dụng model mới với tham số tốc độ
+        const apiUrl = `http://localhost:5004/tts?text=${encodeURIComponent(text)}&speed=${speed}`;
+        const response = await fetch(apiUrl);
+        
+        // Phân tích phản hồi JSON
+        const data = await response.json();
+        console.log('Model mới response:', data);
+        
+        // Sử dụng audio_url từ phản hồi
+        url = data.audio_url;
+      }
       
-      // response.data bây giờ là Blob
-      const audioBlob = response.data;
-      const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
       message.success('Đã tạo giọng nói thành công!');
     } catch (error) {
@@ -77,7 +95,11 @@ const TextToSpeech = () => {
         message="Thông tin về model"
         description={
           <div>
-            <p>Model hiện tại: <strong>facebook/mms-tts-vie</strong></p>
+            <p>Hiện có 2 model text-to-speech:</p>
+            <ul>
+              <li><strong>Model</strong> facebook/mms-tts-vie (không hỗ trợ tùy chỉnh tốc độ)</li>
+              <li><strong>Model</strong> vits-vietnamese (hỗ trợ tùy chỉnh tốc độ)</li>
+            </ul>
           </div>
         }
         type="info"
@@ -104,6 +126,39 @@ const TextToSpeech = () => {
             }}
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              
+              {/* Phần chọn model */}
+              <div style={{ marginBottom: '15px' }}>
+                <Text strong style={{ marginBottom: '10px', display: 'block' }}>Chọn Model:</Text>
+                <Radio.Group 
+                  value={selectedModel} 
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  style={{ width: '100%' }}
+                >
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <Radio value="model_old">Model (facebook/mms-tts-vie)</Radio>
+                    <Radio value="model_new">Model (vits-vietnamese)</Radio>
+                  </Space>
+                </Radio.Group>
+              </div>
+              
+              {/* Phần chọn tốc độ (chỉ hiển thị khi chọn model mới) */}
+              {selectedModel === 'model_new' && (
+                <div style={{ marginBottom: '15px' }}>
+                  <Text strong style={{ marginBottom: '10px', display: 'block' }}>Tốc độ:</Text>
+                  <Select
+                    value={speed}
+                    onChange={(value) => setSpeed(value)}
+                    style={{ width: '100%' }}
+                  >
+                    <Option value="slow">Chậm</Option>
+                    <Option value="normal">Chuẩn</Option>
+                    <Option value="fast">Nhanh</Option>
+                    <Option value="very_fast">Rất nhanh</Option>
+                  </Select>
+                </div>
+              )}
+
               <div style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', width: '100%' }}>
                   <Text strong>Nhập văn bản:</Text>
@@ -217,10 +272,22 @@ const TextToSpeech = () => {
                   <Col span={24} style={{ paddingLeft: 0 }}>
                     <Statistic 
                       title="Model" 
-                      value="facebook/mms-tts-vie" 
+                      value={selectedModel === 'model_old' ? 'facebook/mms-tts-vie' : 'vits-vietnamese'} 
                       valueStyle={{ fontSize: '16px' }}
                     />
                   </Col>
+                  {selectedModel === 'model_new' && (
+                    <Col span={24} style={{ paddingLeft: 0 }}>
+                      <Statistic 
+                        title="Tốc độ" 
+                        value={speed === 'normal' ? 'Chuẩn' : 
+                              speed === 'fast' ? 'Nhanh' : 
+                              speed === 'slow' ? 'Chậm' : 
+                              speed === 'very_fast' ? 'Rất nhanh' : 'Rất chậm'} 
+                        valueStyle={{ fontSize: '16px' }}
+                      />
+                    </Col>
+                  )}
                 </Row>
               </div>
             ) : (
