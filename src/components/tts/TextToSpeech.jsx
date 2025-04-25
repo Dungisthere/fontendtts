@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Card, 
   Input, 
@@ -31,6 +31,33 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Ánh xạ ID giọng với tên thân thiện người dùng
+const voiceNameMapping = {
+  "speechify_1": "Giọng Nam 1",
+  "speechify_2": "Giọng Trung tính 1",
+  "speechify_3": "Giọng Nam 2",
+  "speechify_4": "Giọng Nam 3",
+  "speechify_5": "Giọng Nam cợt nhả 1",
+  "speechify_6": "Giọng Nam 5",
+  "speechify_7": "Giọng Nam 6",
+  "speechify_8": "Giọng Nam 7",
+  "speechify_9": "Giọng Nữ  1 (dịu dàng)",
+  "speechify_10": "Giọng Nam 8 (kiến thức thú vị)",
+  "speechify_11": "Giọng Nữ 2(khuyên dùng)",
+  "speechify_12": "Giọng Nam 9",
+  "cdteam": "Giọng Nam 10",
+  "nguyen-ngoc-ngan": "Giọng Nguyễn Ngọc Ngạn",
+  "son-tung-mtp": "Giọng Sơn Tùng MTP",
+  "diep-chi": "Giọng Nữ 5 (Nam)",
+  "nu-nhe-nhang": "Giọng Nữ Nhẹ Nhàng",
+  "quynh": "Giọng Nữ 4 (Bắc)",
+  "nsnd-le-chuc": "Giọng NSND Lê Chức",
+  "doremon": "Giọng Doremon",
+  "jack-sparrow": "Giọng Jack Sparrow",
+  "zero_shot_prompt": "Giọng Nữ 3(vui nhộn)",
+  "cross_lingual_prompt": "Giọng Nam cợt nhả 2"
+};
+
 const TextToSpeech = () => {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,7 +65,25 @@ const TextToSpeech = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedModel, setSelectedModel] = useState('model_old');
   const [speed, setSpeed] = useState('normal');
+  const [vietTTSVoices, setVietTTSVoices] = useState([]);
+  const [selectedVietTTSVoice, setSelectedVietTTSVoice] = useState('cdteam');
   const { user } = useSelector((state) => state.auth);
+
+  // Tải danh sách giọng nói VietTTS khi component được render
+  useEffect(() => {
+    const loadVietTTSVoices = async () => {
+      try {
+        const voices = await ttsService.getVietTTSVoices();
+        setVietTTSVoices(voices);
+        console.log('Loaded VietTTS voices:', voices);
+      } catch (error) {
+        console.error('Failed to load VietTTS voices:', error);
+        message.error('Không thể tải danh sách giọng nói VietTTS');
+      }
+    };
+    
+    loadVietTTSVoices();
+  }, []);
 
   const handleGenerateSpeech = async () => {
     if (!text.trim()) {
@@ -60,7 +105,7 @@ const TextToSpeech = () => {
         // Tạo URL từ blob
         const audioBlob = response.data;
         url = URL.createObjectURL(audioBlob);
-      } else {
+      } else if (selectedModel === 'model_new') {
         // Sử dụng model mới với tham số tốc độ
         const apiUrl = `http://localhost:5004/tts?text=${encodeURIComponent(text)}&speed=${speed}`;
         const response = await fetch(apiUrl);
@@ -71,6 +116,14 @@ const TextToSpeech = () => {
         
         // Sử dụng audio_url từ phản hồi
         url = data.audio_url;
+      } else if (selectedModel === 'viet_tts') {
+        // Sử dụng VietTTS API
+        const response = await ttsService.generateVietTTSSpeech(text, selectedVietTTSVoice);
+        console.log('VietTTS Response status:', response.status);
+        
+        // Tạo URL từ blob
+        const audioBlob = response.data;
+        url = URL.createObjectURL(audioBlob);
       }
       
       setAudioUrl(url);
@@ -95,10 +148,11 @@ const TextToSpeech = () => {
         message="Thông tin về model"
         description={
           <div>
-            <p>Hiện có 2 model text-to-speech:</p>
+            <p>Hiện có 3 model text-to-speech:</p>
             <ul>
               <li><strong>Model</strong> facebook/mms-tts-vie (không hỗ trợ tùy chỉnh tốc độ)</li>
               <li><strong>Model</strong> vits-vietnamese (hỗ trợ tùy chỉnh tốc độ)</li>
+              <li><strong>Model</strong> VietTTS (hỗ trợ nhiều giọng đọc Tiếng Việt)</li>
             </ul>
           </div>
         }
@@ -138,6 +192,7 @@ const TextToSpeech = () => {
                   <Space direction="vertical" style={{ width: '100%' }}>
                     <Radio value="model_old">Model (facebook/mms-tts-vie)</Radio>
                     <Radio value="model_new">Model (vits-vietnamese)</Radio>
+                    <Radio value="viet_tts">Model (VietTTS)</Radio>
                   </Space>
                 </Radio.Group>
               </div>
@@ -155,6 +210,31 @@ const TextToSpeech = () => {
                     <Option value="normal">Chuẩn</Option>
                     <Option value="fast">Nhanh</Option>
                     <Option value="very_fast">Rất nhanh</Option>
+                  </Select>
+                </div>
+              )}
+
+              {/* Phần chọn giọng đọc (chỉ hiển thị khi chọn VietTTS) */}
+              {selectedModel === 'viet_tts' && (
+                <div style={{ marginBottom: '15px' }}>
+                  <Text strong style={{ marginBottom: '10px', display: 'block' }}>Giọng đọc:</Text>
+                  <Select
+                    value={selectedVietTTSVoice}
+                    onChange={(value) => setSelectedVietTTSVoice(value)}
+                    style={{ width: '100%' }}
+                    placeholder="Chọn giọng đọc"
+                    loading={vietTTSVoices.length === 0}
+                    showSearch
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                  >
+                    {vietTTSVoices.map(voice => (
+                      <Option key={voice} value={voice}>
+                        {voiceNameMapping[voice] || voice}
+                      </Option>
+                    ))}
                   </Select>
                 </div>
               )}
@@ -272,7 +352,7 @@ const TextToSpeech = () => {
                   <Col span={24} style={{ paddingLeft: 0 }}>
                     <Statistic 
                       title="Model" 
-                      value={selectedModel === 'model_old' ? 'facebook/mms-tts-vie' : 'vits-vietnamese'} 
+                      value={selectedModel === 'model_old' ? 'facebook/mms-tts-vie' : selectedModel === 'model_new' ? 'vits-vietnamese' : 'VietTTS'} 
                       valueStyle={{ fontSize: '16px' }}
                     />
                   </Col>
@@ -284,6 +364,15 @@ const TextToSpeech = () => {
                               speed === 'fast' ? 'Nhanh' : 
                               speed === 'slow' ? 'Chậm' : 
                               speed === 'very_fast' ? 'Rất nhanh' : 'Rất chậm'} 
+                        valueStyle={{ fontSize: '16px' }}
+                      />
+                    </Col>
+                  )}
+                  {selectedModel === 'viet_tts' && (
+                    <Col span={24} style={{ paddingLeft: 0 }}>
+                      <Statistic 
+                        title="Giọng đọc" 
+                        value={voiceNameMapping[selectedVietTTSVoice] || selectedVietTTSVoice} 
                         valueStyle={{ fontSize: '16px' }}
                       />
                     </Col>

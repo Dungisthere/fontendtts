@@ -117,6 +117,29 @@ export const ttsService = {
     }
   },
   
+  // Lấy danh sách giọng nói từ VietTTS
+  getVietTTSVoices: async () => {
+    try {
+      const response = await api.get('/viet-tts/v1/voices');
+      // Chuyển đổi chuỗi JSON trong response thành mảng JavaScript
+      if (response.data && response.data.voices) {
+        const voicesStr = response.data.voices;
+        // Xử lý chuỗi JSON từ response
+        try {
+          const voicesArray = JSON.parse(voicesStr);
+          return voicesArray;
+        } catch (e) {
+          console.error('Error parsing voices JSON:', e);
+          return [];
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error('Get VietTTS voices error:', error);
+      throw error;
+    }
+  },
+  
   // API tạo giọng nói với tùy chọn model và giọng đọc
   generateSpeech: async (text, model_type = "mien-nam", voice = null, speed = 1.0) => {
     // Kiểm tra đăng nhập từ localStorage
@@ -140,6 +163,25 @@ export const ttsService = {
       return response;
     } catch (error) {
       console.error('TTS generation error:', error);
+      throw error;
+    }
+  },
+  
+  // API tạo giọng nói sử dụng VietTTS
+  generateVietTTSSpeech: async (text, voice = "cdteam") => {
+    try {
+      const response = await api.post('/viet-tts/v1/audio/speech',
+        {
+          input: text,
+          voice: voice
+        },
+        {
+          responseType: 'blob'
+        }
+      );
+      return response;
+    } catch (error) {
+      console.error('VietTTS generation error:', error);
       throw error;
     }
   }
