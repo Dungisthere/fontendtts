@@ -88,8 +88,71 @@ export const authService = {
       const response = await api.get(`/users/${user.id}`);
       return response.data;
     } catch (error) {
-      console.error('Get user error:', error);
+      console.error('Get user error:', error); 
       throw error;
+    }
+  },
+  
+  updateUserProfile: async (userId, userData, currentPassword) => {
+    try {
+      // Xác thực mật khẩu hiện tại trước khi cập nhật
+      if (userData.password) {
+        const user = getUserFromStorage();
+        if (!user) {
+          throw new Error('Không tìm thấy thông tin người dùng');
+        }
+        
+        // Kiểm tra xác thực với mật khẩu hiện tại
+        try {
+          await api.post('/users/login', {
+            username: user.username,
+            password: currentPassword
+          });
+        } catch (error) {
+          throw new Error('Mật khẩu hiện tại không chính xác');
+        }
+      }
+      
+      // Cập nhật thông tin người dùng
+      const response = await api.put(`/users/${userId}`, userData);
+      
+      // Cập nhật thông tin người dùng trong localStorage
+      const updatedUser = { ...getUserFromStorage(), ...response.data };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return response.data;
+    } catch (error) {
+      console.error('Update user profile error:', error);
+      
+      if (error.message) {
+        throw new Error(error.message);
+      }
+      
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      
+      throw new Error('Cập nhật thông tin thất bại. Vui lòng thử lại sau.');
+    }
+  },
+  
+  changePassword: async (userId, currentPassword, newPassword) => {
+    try {
+      // Sử dụng API đổi mật khẩu mới
+      const response = await api.post(`/users/${userId}/change-password`, {
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Change password error:', error);
+      
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      
+      throw new Error('Đổi mật khẩu thất bại. Vui lòng thử lại sau.');
     }
   }
 };

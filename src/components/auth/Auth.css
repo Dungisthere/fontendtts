@@ -47,9 +47,30 @@
 
 .auth-footer {
   text-align: center;
+  margin-top: 20px;
 }
 
 .auth-link {
   font-weight: bold;
   color: #1890ff;
+}
+
+/* CSS cho trang profile */
+.profile-container {
+  background: #f0f2f5;
+  padding: 40px 0;
+  min-height: calc(100vh - 64px);
+  margin-top: 64px;
+}
+
+.profile-container .auth-card {
+  margin-bottom: 20px;
+}
+
+.profile-container .ant-form-item {
+  margin-bottom: 24px;
+}
+
+.profile-container .ant-divider {
+  margin: 32px 0 24px;
 }

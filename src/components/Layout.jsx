@@ -78,6 +78,7 @@ const MainLayout = ({ children }) => {
         key: '1',
         label: 'Thông tin tài khoản',
         icon: <UserOutlined />,
+        onClick: () => navigate('/profile'),
       },
       {
         key: '2',

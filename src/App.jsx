@@ -8,6 +8,7 @@ import MainLayout from './components/Layout';
 import AdminLayout from './components/admin/AdminLayout';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import UserProfile from './components/auth/UserProfile';
 import TextToSpeech from './components/tts/TextToSpeech';
 import VoiceLibrary from './components/tts/VoiceLibrary';
 import PrivateRoute from './components/auth/PrivateRoute';
@@ -20,6 +21,7 @@ import SystemConfig from './components/admin/SystemConfig';
 import { fetchUserData } from './redux/authSlice';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Thêm CSS để đảm bảo toàn bộ app có chiều rộng 100%
 const appStyles = {
@@ -67,6 +69,17 @@ function AppContent() {
             <PrivateRoute>
               <MainLayout>
                 <VoiceLibrary />
+              </MainLayout>
+            </PrivateRoute>
+          } 
+        />
+        
+        <Route 
+          path="/profile" 
+          element={
+            <PrivateRoute>
+              <MainLayout>
+                <UserProfile />
               </MainLayout>
             </PrivateRoute>
           } 
@@ -142,7 +155,18 @@ function App() {
           <AppContent />
         </div>
       </ConfigProvider>
-      <ToastContainer />
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </Provider>
   );
 }

@@ -52,6 +52,30 @@ export const fetchUserData = createAsyncThunk(
   }
 );
 
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async ({ userId, userData, currentPassword }, { rejectWithValue }) => {
+    try {
+      const response = await authService.updateUserProfile(userId, userData, currentPassword);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Cập nhật thông tin thất bại');
+    }
+  }
+);
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ userId, currentPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const response = await authService.changePassword(userId, currentPassword, newPassword);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message || 'Đổi mật khẩu thất bại');
+    }
+  }
+);
+
 // Auth slice
 const authSlice = createSlice({
   name: 'auth',
@@ -60,6 +84,8 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     registerSuccess: false,
+    updateSuccess: false,
+    passwordChangeSuccess: false,
   },
   reducers: {
     logout: (state) => {
@@ -73,6 +99,12 @@ const authSlice = createSlice({
     clearRegisterSuccess: (state) => {
       state.registerSuccess = false;
     },
+    clearUpdateSuccess: (state) => {
+      state.updateSuccess = false;
+    },
+    clearPasswordChangeSuccess: (state) => {
+      state.passwordChangeSuccess = false;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -118,9 +150,48 @@ const authSlice = createSlice({
       .addCase(fetchUserData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      
+      // Update user profile
+      .addCase(updateUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.updateSuccess = false;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
+        state.updateSuccess = true;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.updateSuccess = false;
+      })
+      
+      // Change password
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.passwordChangeSuccess = false;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.passwordChangeSuccess = true;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.passwordChangeSuccess = false;
       });
   },
 });
 
-export const { logout, clearError, clearRegisterSuccess } = authSlice.actions;
+export const { 
+  logout, 
+  clearError, 
+  clearRegisterSuccess, 
+  clearUpdateSuccess,
+  clearPasswordChangeSuccess 
+} = authSlice.actions;
 export default authSlice.reducer; 
