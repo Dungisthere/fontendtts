@@ -61,7 +61,7 @@ const Login = () => {
               <LoginOutlined style={{ marginRight: 10 }} />
               Đăng Nhập
             </Title>
-            <Text type="secondary">Chào mừng bạn đến với ứng dụng TTS</Text>
+            <Text type="secondary">Chào mừng bạn đến với ứng dụng HiSpeech</Text>
           </div>
           
           <Form

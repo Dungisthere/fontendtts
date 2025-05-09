@@ -371,7 +371,7 @@ const UserManagement = () => {
             />
           </Tooltip>
           
-          <Tooltip title="Nạp tiền">
+          {/* <Tooltip title="Nạp tiền">
             <Button
               icon={<DollarOutlined />}
               onClick={() => showAddCreditsModal(record)}
@@ -389,7 +389,7 @@ const UserManagement = () => {
               size="small"
               danger
             />
-          </Tooltip>
+          </Tooltip> */}
           
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa người dùng này?"

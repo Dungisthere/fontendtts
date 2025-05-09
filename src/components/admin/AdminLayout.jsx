@@ -35,15 +35,15 @@ const AdminLayout = ({ children }) => {
   const userMenuItems = {
     items: [
       {
-        key: '1',
-        label: 'Thông tin tài khoản',
-        icon: <UserOutlined />,
+        // key: '1',
+        // label: 'Thông tin tài khoản',
+        // icon: <UserOutlined />,
       },
-      {
-        key: '2',
-        label: 'Cài đặt',
-        icon: <SettingOutlined />,
-      },
+      // {
+      //   key: '2',
+      //   label: 'Cài đặt',
+      //   icon: <SettingOutlined />,
+      // },
       {
         type: 'divider',
       },
@@ -185,7 +185,7 @@ const AdminLayout = ({ children }) => {
         </Content>
         
         <Footer style={{ textAlign: 'center' }}>
-          TTS Admin ©{new Date().getFullYear()} - Hệ thống quản trị
+          HiSpeech Admin ©{new Date().getFullYear()} - Hệ thống quản trị
         </Footer>
       </Layout>
     </Layout>

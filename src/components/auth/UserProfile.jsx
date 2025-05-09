@@ -104,7 +104,7 @@ const UserProfile = () => {
               }}
               onFinish={handleProfileUpdate}
             >
-              <Form.Item
+              {/* <Form.Item
                 name="username"
                 label="Tên người dùng"
                 rules={[
@@ -116,7 +116,7 @@ const UserProfile = () => {
                   prefix={<UserOutlined />} 
                   placeholder="Tên người dùng" 
                 />
-              </Form.Item>
+              </Form.Item> */}
               
               <Form.Item
                 name="email"

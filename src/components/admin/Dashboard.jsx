@@ -74,12 +74,12 @@ const Dashboard = () => {
       dataIndex: 'email',
       key: 'email',
     },
-    {
-      title: 'Credits',
-      dataIndex: 'credits',
-      key: 'credits',
-      render: (credits) => `${credits.toLocaleString('vi-VN')}`,
-    },
+    // {
+    //   title: 'Credits',
+    //   dataIndex: 'credits',
+    //   key: 'credits',
+    //   render: (credits) => `${credits.toLocaleString('vi-VN')}`,
+    // },
     {
       title: 'Trạng thái',
       dataIndex: 'active',
@@ -100,11 +100,11 @@ const Dashboard = () => {
         </Tag>
       ),
     },
-    {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-    },
+    // {
+    //   title: 'Ngày tạo',
+    //   dataIndex: 'createdAt',
+    //   key: 'createdAt',
+    // },
   ];
 
   if (loading) {
@@ -152,7 +152,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         
-        <Col xs={24} sm={12} md={8}>
+        {/* <Col xs={24} sm={12} md={8}>
           <Card hoverable>
             <Statistic
               title="Tổng số Credits"
@@ -161,7 +161,7 @@ const Dashboard = () => {
               valueStyle={{ color: '#722ed1' }}
             />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
       
       <Card 

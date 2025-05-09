@@ -34,28 +34,28 @@ const { Option } = Select;
 // Ánh xạ ID giọng với tên thân thiện người dùng
 const voiceNameMapping = {
   "speechify_1": "Giọng Nam 1",
-  "speechify_2": "Giọng Trung tính 1",
+  "speechify_2": "Giọng Nam (Trung tính)",
   "speechify_3": "Giọng Nam 2",
   "speechify_4": "Giọng Nam 3",
   "speechify_5": "Giọng Nam cợt nhả 1",
   "speechify_6": "Giọng Nam 5",
   "speechify_7": "Giọng Nam 6",
   "speechify_8": "Giọng Nam 7",
-  "speechify_9": "Giọng Nữ  1 (dịu dàng)",
-  "speechify_10": "Giọng Nam 8 (kiến thức thú vị)",
-  "speechify_11": "Giọng Nữ 2(khuyên dùng)",
+  "speechify_9": "Giọng Nữ 1 (Dịu dàng)",
+  "speechify_10": "Giọng Nam 8 (Review)",
+  "speechify_11": "Giọng Nữ 2( Khuyên dùng)",
   "speechify_12": "Giọng Nam 9",
   "cdteam": "Giọng Nam 10",
   "nguyen-ngoc-ngan": "Giọng Nguyễn Ngọc Ngạn",
   "son-tung-mtp": "Giọng Sơn Tùng MTP",
-  "diep-chi": "Giọng Nữ 5 (Nam)",
+  "diep-chi": "Giọng Nữ 5 (Diệp Chi)",
   "nu-nhe-nhang": "Giọng Nữ Nhẹ Nhàng",
-  "quynh": "Giọng Nữ 4 (Bắc)",
+  "quynh": "Giọng Nữ 4 (Quỳnh)",
   "nsnd-le-chuc": "Giọng NSND Lê Chức",
   "doremon": "Giọng Doremon",
   "jack-sparrow": "Giọng Jack Sparrow",
-  "zero_shot_prompt": "Giọng Nữ 3(vui nhộn)",
-  "cross_lingual_prompt": "Giọng Nam cợt nhả 2"
+  "zero_shot_prompt": "Giọng Nữ 3 (vui nhộn)",
+  "cross_lingual_prompt": "Giọng Nam (cợt nhả 2)"
 };
 
 const TextToSpeech = () => {
@@ -106,17 +106,28 @@ const TextToSpeech = () => {
         const audioBlob = response.data;
         url = URL.createObjectURL(audioBlob);
       } else if (selectedModel === 'model_new') {
-        // Sử dụng model mới với tham số tốc độ
-        const apiUrl = `http://localhost:5004/tts?text=${encodeURIComponent(text)}&speed=${speed}`;
-        const response = await fetch(apiUrl);
-        
-        // Phân tích phản hồi JSON
+        // Gọi API TTS (đã yêu cầu header X-API-KEY)
+        const apiUrl =
+          `http://localhost:5004/tts?text=${encodeURIComponent(text)}&speed=${encodeURIComponent(speed)}`;
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'X-API-KEY': 'model1voice'    // <<-- thêm khóa ở đây
+          }
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || `TTS request failed (${response.status})`);
+        }
+
         const data = await response.json();
         console.log('Model mới response:', data);
-        
+
         // Sử dụng audio_url từ phản hồi
         url = data.audio_url;
-      } else if (selectedModel === 'viet_tts') {
+    } else if (selectedModel === 'viet_tts') {
         // Sử dụng VietTTS API
         const response = await ttsService.generateVietTTSSpeech(text, selectedVietTTSVoice);
         console.log('VietTTS Response status:', response.status);

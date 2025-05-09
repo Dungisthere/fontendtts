@@ -80,11 +80,11 @@ const MainLayout = ({ children }) => {
         icon: <UserOutlined />,
         onClick: () => navigate('/profile'),
       },
-      {
-        key: '2',
-        label: 'Cài đặt',
-        icon: <SettingOutlined />,
-      },
+      // {
+      //   key: '2',
+      //   label: 'Cài đặt',
+      //   icon: <SettingOutlined />,
+      // },
       // Thêm menu admin cho dropdown nếu người dùng có quyền admin
       ...(user && user.usertype === 'admin' ? [{
         key: 'admin',
@@ -277,7 +277,7 @@ const MainLayout = ({ children }) => {
           
           <div style={{ borderTop: '1px solid #ddd', paddingTop: '15px', marginTop: '10px' }}>
             <p style={{ margin: 0 }}>
-              {config && config.website_name ? config.website_name : 'TTS App'} ©{new Date().getFullYear()} - Bản quyền thuộc về chúng tôi
+              {config && config.website_name ? config.website_name : 'TTS App'} ©{new Date().getFullYear()} - Bản quyền thuộc về chúng tôi.
             </p>
           </div>
         </div>
